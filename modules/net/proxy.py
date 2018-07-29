@@ -8,6 +8,8 @@ from SocketServer import ThreadingMixIn
 from urlparse import urlparse, urlunparse, ParseResult
 from socket import socket
 from ssl import wrap_socket
+from httplib import HTTPResponse
+from StringIO import StringIO
 import threading
 import re
 import os
@@ -101,6 +103,12 @@ class CertificateAuthority(object):
 
 class UnsupportedSchemeException(Exception):
     pass
+
+class FakeSocket():
+    def __init__(self, response_str):
+        self._file = StringIO(response_str)
+    def makefile(self, *args, **kwargs):
+        return self._file
 
 class ProxyHandler(BaseHTTPRequestHandler):
 
@@ -212,9 +220,33 @@ class ProxyHandler(BaseHTTPRequestHandler):
         dlog.debug('> ' + '\r\n> '.join([ '%s: %s' % (h.title(), self.headers[h]) for h in self.headers ]))
         dlog.debug('< ' + '\r\n< '.join(headers))
 
-        self.wfile.write('\r\n'.join(headers))
-        self.wfile.write('\r\n\r\n')
-        self.wfile.write(result)
+        # self.wfile.write('\r\n'.join(headers))
+        # self.wfile.write('\r\n\r\n')
+        # self.wfile.write(result)
+
+        http_response_str = '\r\n'.join(headers) + '\r\n\r\n' + result
+
+
+        # Parse response
+        source = FakeSocket(http_response_str)
+        h = HTTPResponse(source)
+        h.begin()
+
+        # Get rid of the pesky header
+        del h.msg['Transfer-Encoding']
+
+        # Time to relay the message across
+        res = '%s %s %s\r\n' % (self.request_version, h.status, h.reason)
+        res += '%s\r\n' % h.msg
+        res += h.read()
+
+        # Let's close off the remote end
+        h.close()
+        self._proxy_sock.close()
+
+        # Relay the message
+        self.request.sendall(res)
+
 
     def __getattr__(self, item):
         if item.startswith('do_'):
