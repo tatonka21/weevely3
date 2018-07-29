@@ -293,12 +293,16 @@ class Proxy(Module):
         self.register_arguments([
             { 'name' : '-lhost', 'default' : '127.0.0.1' },
             { 'name' : '-lport', 'default' : 8080, 'type' : int },
+            { 'name' : '-cert', 'default' : os.path.join(self.folder, 'cert.pem') },
             { 'name' : '-no-background', 'action' : 'store_true', 'default' : False, 'help' : 'Run foreground' }
         ])
 
     def run(self):
 
-        server =AsyncMitmProxy()
+        server = AsyncMitmProxy(
+            server_address=( self.args['lhost'], self.args['lport'] ),
+            ca_file=self.args['cert']
+        )
 
         log.warn(messages.module_net_proxy.proxy_set_address_s_i % ( self.args['lhost'], self.args['lport'] ))
 
