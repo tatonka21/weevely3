@@ -114,10 +114,8 @@ class ProxyHandler(BaseHTTPRequestHandler):
         
         # Get hostname and port to connect to
         if self.is_connect:
-            self.url = 'https://' + self.path
             self.hostname, self.port = self.path.split(':')
         else:
-            self.url = self.path
             u = urlparse(self.path)
             if u.scheme != 'http':
                 raise UnsupportedSchemeException('Unknown scheme %s' % repr(u.scheme))
@@ -181,15 +179,18 @@ class ProxyHandler(BaseHTTPRequestHandler):
             # Extract path
 
         net_curl_args = [
-            self.url,
             '-X',
             self.command,
             '-i'
         ]
 
         for h in self.headers:
-            if h.title().lower() in ('keep-alive', 'proxy-connection', 'connection'):
+            if h.title().lower() in ('keep-alive', 'proxy-connection', 'connection', 'transfer-encoding'):
                 continue
+                
+            if h.title().lower() == 'host':
+                host = self.headers[h]
+                
             net_curl_args += [ '-H', '%s: %s' % ( h.title(), self.headers[h] ) ]
 
         net_curl_args += [ '-H', 'Proxy-Connection: close' ]
@@ -197,6 +198,11 @@ class ProxyHandler(BaseHTTPRequestHandler):
         if self.command == 'POST':
             content_len = int(self.headers.getheader('content-length', 0))
             net_curl_args += [ '-d', self.rfile.read(content_len) ]
+
+        if self.ssl_host:
+            net_curl_args.append('https://' + host + self.path)
+        else:
+            net_curl_args.append('http://' + host + self.path)
 
         result, headers, saved = ModuleExec(
             'net_curl',
