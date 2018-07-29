@@ -185,7 +185,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
         ]
 
         for h in self.headers:
-            if h.title().lower() in ('keep-alive', 'proxy-connection', 'connection', 'transfer-encoding'):
+            if h.title().lower() in ('keep-alive', 'proxy-connection', 'connection'):
                 continue
                 
             if h.title().lower() == 'host':
