@@ -63,6 +63,14 @@ class CertificateAuthority(object):
             ])
         self.cert.sign(self.key, "sha1")
 
+        try:
+            os.makedirs(os.path.dirname(self.ca_file))
+        except OSError as exc:
+            if exc.errno == errno.EEXIST and os.path.isdir(path):
+                pass
+            else:
+                raise
+
         with open(self.ca_file, 'wb+') as f:
             f.write(dump_privatekey(FILETYPE_PEM, self.key))
             f.write(dump_certificate(FILETYPE_PEM, self.cert))
