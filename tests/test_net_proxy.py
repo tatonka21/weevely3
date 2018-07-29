@@ -1,5 +1,4 @@
 from tests.base_test import BaseTest
-from testfixtures import log_capture
 from tests import config
 from core.sessions import SessionURL
 from core import modules
@@ -46,8 +45,7 @@ class Proxy(BaseTest):
     def _clean_result(self, result):
         return result if not result else re.sub('[\n]|[ ]{2,}',' ', result)
 
-    @log_capture()
-    def test_all(self, log_captured):
+    def test_all(self):
 
         # Simple GET
         self.assertIn(
@@ -97,16 +95,10 @@ class Proxy(BaseTest):
         )
 
         # UNREACHABLE
-        self.assertIsNone(self.run_argv([ 'http://co.uk:0' ]))
-        self.assertEqual(messages.module_net_curl.unexpected_response,
-                         log_captured.records[-1].msg)
+        self.assertIn('Message: [Errno -2] Name or service not known.', self.run_argv([ 'http://co.uk:0' ]))
 
         # FILTERED
-        self.assertIsNone(self.run_argv([ 'http://www.google.com:9999', '--connect-timeout', '1' ]))
-        self.assertEqual(messages.module_net_curl.unexpected_response,
-                         log_captured.records[-1].msg)
+        self.assertIn('Message: timed out.', self.run_argv([ 'http://www.google.com:9999', '--connect-timeout', '1' ]))
 
         # CLOSED
-        self.assertIsNone(self.run_argv([ 'http://localhost:9999', '--connect-timeout', '1' ]))
-        self.assertEqual(messages.module_net_curl.unexpected_response,
-                         log_captured.records[-1].msg)
+        self.assertIn('Message: [Errno 111] Connection refused.', self.run_argv([ 'http://localhost:9999', '--connect-timeout', '1' ]))
