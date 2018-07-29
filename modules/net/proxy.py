@@ -7,14 +7,19 @@ from tempfile import gettempdir
 from SocketServer import ThreadingMixIn
 from urlparse import urlparse, urlunparse, ParseResult
 from socket import socket
-from ssl import wrap_socket
 from httplib import HTTPResponse
 from StringIO import StringIO
 import threading
 import re
 import os
+import ssl
 from OpenSSL.crypto import X509Extension, X509, dump_privatekey, dump_certificate, load_certificate, load_privatekey, PKey, TYPE_RSA, X509Req
 from OpenSSL.SSL import FILETYPE_PEM
+
+context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+context.verify_mode = ssl.CERT_NONE
+context.check_hostname = False
+context.load_default_certs()
 
 class CertificateAuthority(object):
 
@@ -147,11 +152,10 @@ class ProxyHandler(BaseHTTPRequestHandler):
 
         # Wrap socket if SSL is required
         if self.is_connect:
-            self._proxy_sock = wrap_socket(self._proxy_sock)
-
+            self._proxy_sock = context.wrap_socket(self._proxy_sock, server_hostname=self.hostname)
 
     def _transition_to_ssl(self):
-        self.request = wrap_socket(self.request, server_side=True, certfile=self.server.ca[self.path.split(':')[0]])
+        self.request = ssl.wrap_socket(self.request, server_side=True, certfile=self.server.ca[self.path.split(':')[0]])
 
     def do_CONNECT(self):
         self.is_connect = True
