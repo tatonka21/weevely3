@@ -66,7 +66,7 @@ class CertificateAuthority(object):
         try:
             os.makedirs(os.path.dirname(self.ca_file))
         except OSError as exc:
-            if exc.errno == errno.EEXIST and os.path.isdir(path):
+            if os.path.isdir(os.path.dirname(self.ca_file)):
                 pass
             else:
                 raise
