@@ -2,6 +2,7 @@ from core.loggers import log, dlog
 from core import messages
 from core.vectors import ModuleExec
 from core.module import Module
+from core.config import base_path
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 from tempfile import gettempdir
 from SocketServer import ThreadingMixIn
@@ -28,6 +29,9 @@ from SocketServer import ThreadingMixIn
 from cStringIO import StringIO
 from subprocess import Popen, PIPE
 from HTMLParser import HTMLParser
+from tempfile import mkdtemp
+
+temp_certdir = mkdtemp()
 
 class FakeSocket():
     def __init__(self, response_str):
@@ -40,7 +44,6 @@ def with_color(c, s):
 
 def join_with_script_dir(path):
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), '_proxy2' , path)
-
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     address_family = socket.AF_INET
@@ -59,7 +62,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
     cakey = join_with_script_dir('ca.key')
     cacert = join_with_script_dir('ca.crt')
     certkey = join_with_script_dir('cert.key')
-    certdir = join_with_script_dir('certs/')
+    certdir = temp_certdir
     timeout = 5
     lock = threading.Lock()
 
@@ -138,7 +141,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         
-        if self.path == 'http://proxy2.test/':
+        if self.path == 'http://weevely/':
             self.send_cacert()
             return
 
