@@ -77,7 +77,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         if isinstance(args[0], socket.timeout):
             return
 
-        self.log_message(format, *args)
+        # self.log_message(format, *args)
 
     def do_CONNECT(self):
         if os.path.isfile(self.cakey) and os.path.isfile(self.cacert) and os.path.isfile(self.certkey) and os.path.isdir(self.certdir):
@@ -105,7 +105,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             self.rfile = self.connection.makefile("rb", self.rbufsize)
             self.wfile = self.connection.makefile("wb", self.wbufsize)
         except Exception as e:
-            print(e)
+            log.debug(e)
             raise
 
         conntype = self.headers.get('Proxy-Connection', '')
@@ -180,8 +180,8 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         
         for h in req.headers:
             # TODO: cancel this?
-            if h.title().lower() in ('keep-alive', 'proxy-connection', 'connection'):
-                continue
+            # if h.title().lower() in ('keep-alive', 'proxy-connection', 'connection'):
+            #     continue
                 
             if h.title().lower() == 'host':
                 host = self.headers[h]
@@ -189,17 +189,24 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             net_curl_args += [ '-H', '%s: %s' % ( h.title(), self.headers[h] ) ]
 
         # TODO: Cancel this?
-        net_curl_args += [ '-H', 'Proxy-Connection: close' ]
+        # net_curl_args += [ '-H', 'Proxy-Connection: close' ]
 
         if self.command == 'POST':
             content_len = int(self.headers.getheader('content-length', 0))
             net_curl_args += [ '-d', self.rfile.read(content_len) ]
 
+
+        # log.debug(' '.join(net_curl_args))
         result, headers, saved = ModuleExec(
             'net_curl',
             net_curl_args
         ).run()
-
+        
+        if not headers:
+            log.debug('Error no headers')
+            self.send_error(500)
+            return
+            
         dlog.debug('> ' + '\r\n> '.join([ '%s: %s' % (h.title(), self.headers[h]) for h in self.headers ]))
         dlog.debug('< ' + '\r\n< '.join(headers))
 
@@ -221,8 +228,13 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                 self.save_handler(req, req_body, res, '')
             return
 
-        res_body = res.read()
-
+        try:
+            res_body = res.read()
+        except Exception as e:
+            log.debug(e)
+            self.send_error(500)
+            return
+            
         content_encoding = res.headers.get('Content-Encoding', 'identity')
         res_body_plain = self.decode_content_body(res_body, content_encoding)
 
@@ -422,7 +434,6 @@ def run_proxy2(HandlerClass=ProxyRequestHandler, ServerClass=ThreadingHTTPServer
     httpd = ServerClass(server_address, HandlerClass)
 
     sa = httpd.socket.getsockname()
-    print "Serving HTTP Proxy on", sa[0], "port", sa[1], "..."
     httpd.serve_forever()
 
 
@@ -449,7 +460,8 @@ class Proxy2(Module):
 
     def run(self):
 
-        log.warn(messages.module_net_proxy.proxy_set_address_s_i % ( self.args['lhost'], self.args['lport'] ))
+        log.warn(messages.module_net_proxy.proxy_starting_s_i % ( self.args['lhost'], self.args['lport'] ))
+        log.warn(messages.module_net_proxy.proxy_set_proxy)
 
         if self.args['no_background']:
             log.warn(messages.module_net_proxy.proxy_started_foreground)
