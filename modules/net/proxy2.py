@@ -39,8 +39,9 @@ class FakeSocket():
     def makefile(self, *args, **kwargs):
         return self._file
 
-def with_color(c, s):
-    return "\x1b[%dm%s\x1b[0m" % (c, s)
+#
+# Most of the Proxy part has been taken from https://github.com/inaz2/proxy2
+#
 
 def join_with_script_dir(path):
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), '_proxy2' , path)
@@ -179,17 +180,11 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         net_curl_args.append(self.path)
         
         for h in req.headers:
-            # TODO: cancel this?
-            # if h.title().lower() in ('keep-alive', 'proxy-connection', 'connection'):
-            #     continue
                 
             if h.title().lower() == 'host':
                 host = self.headers[h]
                 
             net_curl_args += [ '-H', '%s: %s' % ( h.title(), self.headers[h] ) ]
-
-        # TODO: Cancel this?
-        # net_curl_args += [ '-H', 'Proxy-Connection: close' ]
 
         if self.command == 'POST':
             content_len = int(self.headers.getheader('content-length', 0))
