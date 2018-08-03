@@ -223,11 +223,11 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         
         if not headers:
             log.debug('Error no headers')
-            self.send_error(500)
+            self.send_error(502)
             return
             
-        dlog.debug('> ' + '\r\n> '.join([ '%s: %s' % (h.title(), self.headers[h]) for h in self.headers ]))
-        dlog.debug('< ' + '\r\n< '.join(headers))
+        log.debug('> ' + '\r\n> '.join([ '%s: %s' % (h.title(), self.headers[h]) for h in self.headers ]))
+        log.debug('< ' + '\r\n< '.join(headers))
 
         http_response_str = '\r\n'.join(headers) + '\r\n\r\n' + result
         source = FakeSocket(http_response_str)

@@ -97,10 +97,10 @@ class Proxy(BaseTest):
         )
 
         # UNREACHABLE
-        # self.assertIn('Message: [Errno -2] Name or service not known.', self.run_argv([ 'http://co.uk:0' ]))
+        self.assertIn('Message: Bad Gateway.', self.run_argv([ 'http://co.uk:0' ]))
 
         # FILTERED
-        # self.assertIn('Message: timed out.', self.run_argv([ 'http://www.google.com:9999', '--connect-timeout', '1' ]))
+        self.assertIn('Message: Bad Gateway.', self.run_argv([ 'http://www.google.com:9999', '--connect-timeout', '1' ]))
 
         # CLOSED
-        # self.assertIn('Message: [Errno 111] Connection refused.', self.run_argv([ 'http://localhost:9999', '--connect-timeout', '1' ]))
+        self.assertIn('Message: Bad Gateway.', self.run_argv([ 'http://localhost:9999', '--connect-timeout', '1' ]))
