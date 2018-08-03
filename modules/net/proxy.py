@@ -214,7 +214,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
 
         if self.command == 'POST':
             content_len = int(self.headers.getheader('content-length', 0))
-            net_curl_args += [ '-d', self.rfile.read(content_len) ]
+            net_curl_args += [ '-d', req_body ]
 
         result, headers, saved = ModuleExec(
             'net_curl',

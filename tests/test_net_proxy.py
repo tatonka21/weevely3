@@ -75,15 +75,15 @@ class Proxy(BaseTest):
         )
 
         # POST request with data
-        # result = self._clean_result(self.run_argv([ self.checkurl, '--data', 'f1=data1&f2=data2' ]))
-        # self.assertIn(
-        #     '[REQUEST_METHOD] => POST',
-        #     result
-        # )
-        # self.assertIn(
-        #     '[f1] => data1  [f2] => data2',
-        #     result
-        # )
+        result = self._clean_result(self.run_argv([ self.checkurl, '--data', 'f1=data1&f2=data2' ]))
+        self.assertIn(
+            '[REQUEST_METHOD] => POST',
+            result
+        )
+        self.assertIn(
+            '[f1] => data1  [f2] => data2',
+            result
+        )
 
         # GET request with URL
         result = self._clean_result(self.run_argv([ self.checkurl + '/?f1=data1&f2=data2' ]))
