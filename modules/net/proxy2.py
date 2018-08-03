@@ -39,12 +39,42 @@ class FakeSocket():
     def makefile(self, *args, **kwargs):
         return self._file
 
+# Create path for the CA certificates and keys
+cert_folder = os.path.join(base_path, 'certs')
+try:
+    os.makedirs(cert_folder)
+except:
+    pass
+
+def get_cert_path(path):
+    return os.path.join(cert_folder, path)
+
+def initialize_certificates():
+
+    cakey_path = get_cert_path("ca.key")
+    cacrt_path = get_cert_path("ca.crt")
+    certkey_path = get_cert_path("cert.key")
+    
+    if not os.path.isfile(cakey_path) or not os.path.isfile(cacrt_path) or not os.path.isfile(certkey_path):
+        # openssl genrsa -out ca.key 2048
+        p1 = Popen(["openssl", "genrsa", "-out", cakey_path, "2048" ])
+        p1.communicate()
+        p1.wait()
+    
+        # openssl req -new -x509 -days 3650 -key ca.key -out ca.crt -subj "/CN=proxy2 CA"
+        p2 = Popen(["openssl", "req", "-new", "-x509", "-days", "3650", "-key",
+        cakey_path, "-out", cacrt_path, "-subj", "/CN=proxy2 CA" ])
+        p2.communicate()
+        p2.wait()
+        
+        # openssl genrsa -out cert.key 2048
+        p3 = Popen(["openssl", "genrsa", "-out", certkey_path, "2048" ])
+        p3.communicate()
+        p3.wait()
+        
 #
 # Most of the Proxy part has been taken from https://github.com/inaz2/proxy2
 #
-
-def join_with_script_dir(path):
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), '_proxy2' , path)
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     address_family = socket.AF_INET
@@ -60,9 +90,9 @@ class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
 
 
 class ProxyRequestHandler(BaseHTTPRequestHandler):
-    cakey = join_with_script_dir('ca.key')
-    cacert = join_with_script_dir('ca.crt')
-    certkey = join_with_script_dir('cert.key')
+    cakey = get_cert_path('ca.key')
+    cacert = get_cert_path('ca.crt')
+    certkey = get_cert_path('cert.key')
     certdir = temp_certdir
     timeout = 5
     lock = threading.Lock()
@@ -78,17 +108,13 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         if isinstance(args[0], socket.timeout):
             return
 
-        # self.log_message(format, *args)
-
     def do_CONNECT(self):
-        if os.path.isfile(self.cakey) and os.path.isfile(self.cacert) and os.path.isfile(self.certkey) and os.path.isdir(self.certdir):
-            self.connect_intercept()
-        else:
-            self.connect_relay()
+        self.connect_intercept()
 
     def connect_intercept(self):
         hostname = self.path.split(':')[0]
-        certpath = "%s/%s.crt" % (self.certdir.rstrip('/'), hostname)
+        certname = "%s.crt" % (hostname)
+        certpath = os.path.join(self.certdir, certname)
 
         with self.lock:
             if not os.path.isfile(certpath):
@@ -101,7 +127,6 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
         try:
-
             self.connection = ssl.wrap_socket(self.connection, keyfile=self.certkey, certfile=certpath, server_side=True)
             self.rfile = self.connection.makefile("rb", self.rbufsize)
             self.wfile = self.connection.makefile("wb", self.wbufsize)
@@ -376,6 +401,8 @@ class Proxy2(Module):
 
         log.warn(messages.module_net_proxy.proxy_starting_s_i % ( self.args['lhost'], self.args['lport'] ))
         log.warn(messages.module_net_proxy.proxy_set_proxy)
+
+        initialize_certificates()
 
         if self.args['no_background']:
             log.warn(messages.module_net_proxy.proxy_started_foreground)
