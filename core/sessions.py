@@ -54,7 +54,7 @@ class Session(dict):
                     log.info(messages.sessions.set_s_s % (mod_name, mod_value))
 
     def get_connection_info(self):
-     return template.Template(messages.sessions.connection_info).render(
+     return template.Template(messages.sessions.connection_info, output_encoding='utf8').render(
          url = self['url'],
          user = self['system_info']['results'].get('whoami', ''),
          host = self['system_info']['results'].get('hostname', ''),

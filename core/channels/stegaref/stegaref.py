@@ -303,7 +303,7 @@ class StegaRef:
             referer_format = FirstRefererFormat(self.url)
 
             template_first_formatted = Template(
-                template).render(tpl=referer_format)
+                template, output_encoding='utf8').render(tpl=referer_format)
             referrers_vanilla.append(
                 (template_first_formatted, referer_format.chunks_sizes))
 

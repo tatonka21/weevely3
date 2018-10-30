@@ -141,7 +141,8 @@ class Terminal(CmdModules):
 
         # Set a nice intro
         self.intro = template.Template(
-            messages.terminal.welcome_to_s
+            messages.terminal.welcome_to_s,
+            output_encoding='utf8'
         ).render(
             path = self.session.get('path'),
             conn_info = session.get_connection_info(),

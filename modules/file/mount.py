@@ -99,7 +99,8 @@ class Mount(Module):
 
         log.warn(
             template.Template(
-                messages.module_file_mount.agent_installed_tutorial
+                messages.module_file_mount.agent_installed_tutorial,
+                output_encoding='utf8'
             ).render(**self.args)
         )
 

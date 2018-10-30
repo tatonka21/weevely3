@@ -88,7 +88,7 @@ class ModuleExec:
 
         """
 
-        return [ Template(arg).render(**values) for arg in self.arguments ]
+        return [ Template(arg, output_encoding='utf8').render(**values) for arg in self.arguments ]
 
     def run(self, format_args = {}):
         """Run the module with the formatted payload.
@@ -197,7 +197,7 @@ class PhpCode(ModuleExec):
         """
 
         return [
-                    Template(arg).render(**values)
+                    Template(arg, output_encoding='utf8').render(**values)
                     for arg in self.arguments
                 ]
 
@@ -264,6 +264,7 @@ class PhpFile(PhpCode):
                  Template(
                         text = arg,
                         lookup = TemplateLookup(directories = [ self.folder ]),
+                        output_encoding='utf8'
                         ).render(**values)
                  for arg in self.arguments
                 ]

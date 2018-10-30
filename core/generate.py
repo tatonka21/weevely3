@@ -23,7 +23,8 @@ def generate(password, obfuscator = 'obfusc1_php', agent = 'obfpost_php'):
         agent = Template(
             open(
                 agent_path,
-                'r').read()).render(
+                'r').read(), 
+                output_encoding='utf8').render(
             password=password)
     except Exception as e:
         raise FatalException(

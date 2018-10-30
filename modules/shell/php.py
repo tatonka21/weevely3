@@ -92,7 +92,11 @@ class Php(Module):
 
         # Compose command with cwd, pre_command, and post_command option.
         self.args.update({ 'chdir' : chdir })
-        command = Template("""${chdir}${prefix_string}${ ' '.join(command) }${postfix_string}""", strict_undefined=True).render(**self.args)
+        command = Template(
+            """${chdir}${prefix_string}${ ' '.join(command) }${postfix_string}""", 
+            strict_undefined=True,
+            output_encoding='utf8'
+        ).render(**self.args)
 
         # Minify PHP payload.
         #
