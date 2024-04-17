@@ -2,11 +2,11 @@ from core.loggers import dlog, log
 from core import config
 import re
 import urlparse
-import random
 import utils
 import string
 import base64
 import urllib2
+import secrets
 
 class LegacyCookie:
 
@@ -38,7 +38,7 @@ class LegacyCookie:
             "SSID", "USR", "PREF"
         ]
 
-        random.shuffle(self.default_prefixes)
+        secrets.SystemRandom().shuffle(self.default_prefixes)
 
         # Load agents
         self.agents = utils.http.load_all_agents()
@@ -58,7 +58,7 @@ class LegacyCookie:
 
         # Add random cookies before payload
         while len(prefixes) > 3 and len(prefixes) > 4:
-            if random.random() > 0.5:
+            if secrets.SystemRandom().random() > 0.5:
                 break
             cookie_payload_string += (
                 prefixes.pop()
@@ -95,7 +95,7 @@ class LegacyCookie:
 
         additional_headers.append(
             ('User-Agent',
-                (additional_ua if additional_ua else random.choice(self.agents))
+                (additional_ua if additional_ua else secrets.choice(self.agents))
             )
         )
 
