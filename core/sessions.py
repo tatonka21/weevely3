@@ -75,7 +75,7 @@ class Session(dict):
             action_name = 'action_%s' % (module_argument.replace('.','_'))
             if hasattr(self, action_name):
                 action_func = getattr(self, action_name)
-                if hasattr(action_func, '__call__'):
+                if callable(action_func):
                     action_func(module_argument, value)
 
     def action_debug(self, module_argument, value):
@@ -106,7 +106,7 @@ class Session(dict):
         action_name = 'action_%s' % (module_argument.replace('.','_'))
         if hasattr(self, action_name):
             action_func = getattr(self, action_name)
-            if hasattr(action_func, '__call__'):
+            if callable(action_func):
                 action_func(module_argument, None)
 
         if module_argument.count('.') == 1:
@@ -142,7 +142,7 @@ class Session(dict):
         action_name = 'action_%s' % (module_argument.replace('.','_'))
         if hasattr(self, action_name):
             action_func = getattr(self, action_name)
-            if hasattr(action_func, '__call__'):
+            if callable(action_func):
                 action_func(module_argument, value)
 
         if module_argument.count('.') == 1:
