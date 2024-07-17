@@ -1,6 +1,6 @@
-import random
 import string
 import itertools
+import secrets
 
 str2hex = lambda x: "\\x" + "\\x".join([hex(ord(c))[2:].zfill(2) for c in x])
 
@@ -10,18 +10,18 @@ def randstr(n=4, fixed=True, charset=None):
         return ''
 
     if not fixed:
-        n = random.randint(1, n)
+        n = secrets.SystemRandom().randint(1, n)
 
     if not charset:
         charset = string.letters + string.digits
 
-    return ''.join(random.choice(charset) for x in range(n))
+    return ''.join(secrets.choice(charset) for x in range(n))
 
 def divide(data, min_size, max_size, split_size):
     it = iter(data)
     size = len(data)
     for i in range(split_size - 1, 0, -1):
-        s = random.randint(min_size, size - max_size * i)
+        s = secrets.SystemRandom().randint(min_size, size - max_size * i)
         yield ''.join(itertools.islice(it, 0, s))
         size -= s
     yield ''.join(it)
@@ -36,7 +36,7 @@ def pollute(data, charset, frequency=0.3):
 
     str_encoded = ''
     for char in data:
-        if random.random() < frequency:
+        if secrets.SystemRandom().random() < frequency:
             str_encoded += randstr(1, True, charset) + char
         else:
             str_encoded += char

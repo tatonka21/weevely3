@@ -1,9 +1,9 @@
-import random
 import urlparse
 import string
 import urllib
 import utils
 from core import messages
+import secrets
 
 
 class FirstRefererFormat:
@@ -21,8 +21,7 @@ class FirstRefererFormat:
 
             return '.'.join(
                 parsed_url.netloc.split('.')[
-                    1:random.randint(
-                        1,
+                    1:secrets.SystemRandom().randint(1,
                         domain_classes_num)])
 
         else:
@@ -46,7 +45,7 @@ class FirstRefererFormat:
 
     def rand_int(self, minint, maxint):
 
-        return random.randint(minint, maxint)
+        return secrets.SystemRandom().randint(minint, maxint)
 
     def payload_chunk(self, max_size, min_size=None):
         """Return the parameter ${ chunk } formatted when sent"""
@@ -69,7 +68,7 @@ class FirstRefererFormat:
         return '${ url_agent }'
 
     def rand_domain(self):
-        return random.choice(['com', 'ad', 'ae', 'al', 'am', 'as', 'at', 'az',
+        return secrets.choice(['com', 'ad', 'ae', 'al', 'am', 'as', 'at', 'az',
                               'ba', 'be', 'bf', 'bg', 'bi', 'bj', 'bs', 'bt',
                               'by', 'ca', 'cd', 'cf', 'cg', 'ch', 'ci', 'cl',
                               'cm', 'cn', 'cv', 'cz', 'de', 'dj', 'dk', 'dm',
@@ -88,7 +87,7 @@ class FirstRefererFormat:
 
         # http://www.google.com/supported_domains
 
-        return random.choice(['com', 'ad', 'ae', 'com.af', 'com.ag', 'com.ai',
+        return secrets.choice(['com', 'ad', 'ae', 'com.af', 'com.ag', 'com.ai',
                               'al', 'am', 'co.ao', 'com.ar', 'as', 'at', 'com.au',
                               'az', 'ba', 'com.bd', 'be', 'bf', 'bg', 'com.bh',
                               'bi', 'bj', 'com.bn', 'com.bo', 'com.br', 'bs', 'bt',

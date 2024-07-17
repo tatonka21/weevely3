@@ -4,8 +4,8 @@ from core import messages
 from core.channels.channel import Channel
 from core import config
 from core.loggers import log
-import random
 import utils
+import secrets
 
 class Php(Module):
 
@@ -33,7 +33,7 @@ class Php(Module):
 
     def _check_interpreter(self, channel):
 
-        rand = str(random.randint(11111, 99999))
+        rand = str(secrets.SystemRandom().randint(11111, 99999))
 
         command = 'echo(%s);' % rand
         response, code, error = channel.send(command)
