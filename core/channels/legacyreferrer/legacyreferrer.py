@@ -2,11 +2,11 @@ from core.loggers import dlog
 from core import config
 import re
 import urlparse
-import random
 import utils
 import string
 import base64
 import urllib2
+import secrets
 
 class LegacyReferrer:
 
@@ -69,7 +69,7 @@ class LegacyReferrer:
                 additional_headers.append(h)
 
         opener.addheaders = [
-            ('User-Agent', (additional_ua if additional_ua else random.choice(self.agents))),
+            ('User-Agent', (additional_ua if additional_ua else secrets.choice(self.agents))),
             ('Referer', referer),
         ] + additional_headers
 
