@@ -165,7 +165,7 @@ class SessionFile(Session):
     def __init__(self, dbpath, volatile = False):
 
         try:
-            sessiondb = yaml.load(open(dbpath, 'r').read())
+            sessiondb = yaml.load(open(dbpath, 'r').read(), Loader=yaml.SafeLoader)
         except Exception as e:
             log.warn(
                 messages.generic.error_loading_file_s_s %
@@ -216,7 +216,7 @@ class SessionURL(Session):
         for dbpath in sessions_available:
 
             try:
-                sessiondb = yaml.load(open(dbpath, 'r').read())
+                sessiondb = yaml.load(open(dbpath, 'r').read(), Loader=yaml.SafeLoader)
             except Exception as e:
                 log.warn(
                     messages.generic.error_loading_file_s_s %
