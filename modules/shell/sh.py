@@ -4,7 +4,7 @@ from core.loggers import log
 from core.vectors import Os
 from core import messages
 from core import modules
-import random
+import secrets
 
 class Sh(Module):
 
@@ -85,7 +85,7 @@ class Sh(Module):
 
         """
 
-        check_digits = str(random.randint(11111, 99999))
+        check_digits = str(secrets.SystemRandom().randint(11111, 99999))
 
         args_check = {
                     'command': 'echo %s' % check_digits,
