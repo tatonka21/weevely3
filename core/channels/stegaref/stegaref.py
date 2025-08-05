@@ -17,6 +17,7 @@ import itertools
 import utils
 import os
 import httplib
+import secrets
 
 referrer_templates_path = os.path.join(
     config.weevely_path,
@@ -116,7 +117,7 @@ class StegaRef:
                 ('Accept-Language', accept_language_header),
                 ('Accept', accept_header),
                 ('User-Agent', (
-                    additional_ua if additional_ua else random.choice(self.agents)
+                    additional_ua if additional_ua else secrets.choice(self.agents)
                     )
                 )
             ] + additional_headers
@@ -171,8 +172,7 @@ class StegaRef:
 
         for i in range(30):
             session_id = ''.join(
-                random.choice(
-                    string.ascii_lowercase) for x in range(2))
+                secrets.choice(string.ascii_lowercase) for x in range(2))
 
             # Generate 3-character urlsafe_b64encode header and footer
             # checkable on server side
@@ -202,7 +202,7 @@ class StegaRef:
         referrers = []
 
         # Randomize the order
-        random.shuffle(self.referrers_vanilla)
+        secrets.SystemRandom().shuffle(self.referrers_vanilla)
 
         for referrer_index, referrer_vanilla_data in enumerate(itertools.cycle(self.referrers_vanilla)):
 
@@ -250,7 +250,7 @@ class StegaRef:
                     if not remaining_payload:
                         # If not payload, stuff padding
                         payload_size = 0
-                        padding_size = random.randint(min_size, max_size)
+                        padding_size = secrets.SystemRandom().randint(min_size, max_size)
                     elif len(remaining_payload) <= min_size:
                         # Not enough payload, stuff latest payload + padding
                         payload_size = len(remaining_payload)
@@ -340,12 +340,12 @@ class StegaRef:
         languages = [
             l for l in self.languages if '-' not in l and l.startswith(session_id[1])]
         accept_language += '%s;q=0.%i' % (
-            random.choice(languages), positions[0])
+            secrets.choice(languages), positions[0])
 
         # Add remaining q= positions
         for position in positions[1:]:
 
-            language = random.choice(languages)
+            language = secrets.choice(languages)
 
             accept_language += ',%s;q=0.%i' % (language, position)
 
@@ -361,7 +361,7 @@ class StegaRef:
             'text/plain'
         ]
 
-        random.shuffle(content_types)
+        secrets.SystemRandom().shuffle(content_types)
 
         header = []
 
@@ -370,9 +370,9 @@ class StegaRef:
 
         # Add some other content types with quality
         latest_quality = 9
-        for r in range(0, random.randint(1, len(content_types))):
+        for r in range(0, secrets.SystemRandom().randint(1, len(content_types))):
             header.append('%s;0.%i,' %(content_types.pop(), latest_quality))
-            latest_quality = random.randint(latest_quality-2, latest_quality)
+            latest_quality = secrets.SystemRandom().randint(latest_quality-2, latest_quality)
 
         # Add
         header.append('*/*')
